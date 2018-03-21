@@ -1,4 +1,4 @@
-(ns district.graphql-utls
+(ns district.graphql-utils
   (:require
     [camel-snake-kebab.core :as cs :include-macros true]
     [camel-snake-kebab.extras :refer [transform-keys]]

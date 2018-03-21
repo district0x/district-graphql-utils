@@ -7,7 +7,7 @@ Set of helper functions for working with [GraphQL](https://graphql.org/), mostly
 
 
 ## Installation
-Add `[district0x/district-graphql-utils "1.0.0"]` into your project.clj  
+Add `[district0x/district-graphql-utils "1.0.1"]` into your project.clj  
 Include `[district.graphql-utils]` in your CLJS file  
 
 ## API Overview
@@ -24,20 +24,20 @@ Include `[district.graphql-utils]` in your CLJS file
 Converts (namespaced) keyword into GraphQL compatible name (no dots, no slashes, no dashes).  
 Note, this is opinionated way how to convert namespaced keyword into string. 
 ```clojure
-(graphql-utls/kw->gql-name :profile-picture/image-height)
+(graphql-utils/kw->gql-name :profile-picture/image-height)
 ;; => "profilePicture_imageHeight"
 
-(graphql-utls/kw->gql-name :user.profile-picture/image-height)
+(graphql-utils/kw->gql-name :user.profile-picture/image-height)
 ;; => "user_profilePicture_imageHeight"
 ```
 
 #### <a name="gql-name-kw">`gql-name->kw [gql-name]`
 Converts GraphQL compatible name into keyword. 
 ```clojure
-(graphql-utls/gql-name->kw "profilePicture_imageHeight")
+(graphql-utils/gql-name->kw "profilePicture_imageHeight")
 ;; => :profile-picture/image-height
 
-(graphql-utls/gql-name->kw "user_profilePicture_imageHeight")
+(graphql-utils/gql-name->kw "user_profilePicture_imageHeight")
 ;; => :user.profile-picture/image-height
 ```
 
@@ -47,7 +47,7 @@ so it can be passed into a graphql-js library. It also converts field arguments 
 clj.
 
 ```clojure
-(def root-value (graphql-utls/clj->js-root-value {:a (fn [] {:b 1})}))
+(def root-value (graphql-utils/clj->js-root-value {:a (fn [] {:b 1})}))
 (aget ((aget root-value "a")) "b")
 ;; => 1
 ```
@@ -57,7 +57,7 @@ Converts GraphQL response into clj data structures, since GraphQL returns each o
 
 Optionally as a seconds arg you can pass `:gql-name->kw-fn` for custom `gql-name->kw` function. 
 ```clojure
-(graphql-utls/js->clj-response (clj->js {"data" {"profilePicture_imageHeight" 100}}))
+(graphql-utils/js->clj-response (clj->js {"data" {"profilePicture_imageHeight" 100}}))
 ;; => {:data {:profile-picture/image-height 100}}
 ```
 
