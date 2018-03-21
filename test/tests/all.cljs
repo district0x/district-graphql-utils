@@ -14,7 +14,7 @@
   (is (= :profile-picture/image-height (graphql-utils/gql-name->kw "profilePicture_imageHeight")))
   (is (= :user.profile-picture/image-height (graphql-utils/gql-name->kw "user_profilePicture_imageHeight")))
 
-  (let [root-value (graphql-utils/clj->js-root-value {:a (fn [] {:b 1}bu)})]
+  (let [root-value (graphql-utils/clj->js-root-value {:a (fn [] {:b 1})})]
     (is (object? root-value))
     (is (= 1 (aget ((aget root-value "a")) "b"))))
 
