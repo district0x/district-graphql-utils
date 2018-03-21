@@ -7,7 +7,7 @@ Set of helper functions for working with [GraphQL](https://graphql.org/), mostly
 
 
 ## Installation
-Add `[district0x/district-graphql-utils "1.0.1"]` into your project.clj  
+Add `[district0x/district-graphql-utils "1.0.2"]` into your project.clj  
 Include `[district.graphql-utils]` in your CLJS file  
 
 ## API Overview

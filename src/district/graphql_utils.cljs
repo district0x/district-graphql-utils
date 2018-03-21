@@ -33,22 +33,22 @@
         (apply keyword (map cs/->kebab-case parts))))))
 
 
-(defn clj->js-root-value [root-value & [{:keys [:gql-name->kw-fn :kw->gql-name-fn]
-                                         :or {gql-name->kw-fn gql-name->kw
-                                              kw->gql-name-fn kw->gql-name}}]]
-  (if (map? root-value)
-    (clj->js (into {} (map (fn [[k v]]
-                             [(kw->gql-name-fn k)
-                              (if (fn? v)
-                                (fn [params context schema]
-                                  (let [parsed-params (transform-keys gql-name->kw-fn (js->clj params))
-                                        result (clj->js-root-value (v parsed-params context schema))]
-                                    result))
-                                v)])
-                           root-value)))
-    (if (sequential? root-value)
-      (clj->js (map clj->js-root-value root-value))
-      root-value)))
+(defn clj->js-root-value [root-value & [{:keys [:gql-name->kw-fn :kw->gql-name-fn]}]]
+  (let [gql-name->kw-fn (or gql-name->kw-fn gql-name->kw)
+        kw->gql-name-fn (or kw->gql-name-fn kw->gql-name)]
+    (if (map? root-value)
+      (clj->js (into {} (map (fn [[k v]]
+                               [(kw->gql-name-fn k)
+                                (if (fn? v)
+                                  (fn [params context schema]
+                                    (let [parsed-params (transform-keys gql-name->kw-fn (js->clj params))
+                                          result (clj->js-root-value (v parsed-params context schema))]
+                                      result))
+                                  v)])
+                             root-value)))
+      (if (sequential? root-value)
+        (clj->js (map clj->js-root-value root-value))
+        root-value))))
 
 
 (defn- js->clj-result-objects [res]
@@ -60,7 +60,7 @@
                 (js->clj res :keywordize-keys true)))
 
 
-(defn js->clj-response [res & [{:keys [:gql-name->kw-fn]
-                                :or {gql-name->kw-fn gql-name->kw}}]]
-  (let [resp (js->clj-result-objects res)]
+(defn js->clj-response [res & [{:keys [:gql-name->kw-fn]}]]
+  (let [gql-name->kw-fn (or gql-name->kw-fn gql-name->kw)
+        resp (js->clj-result-objects res)]
     (update resp :data #(transform-keys gql-name->kw-fn %))))
