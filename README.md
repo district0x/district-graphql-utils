@@ -7,7 +7,7 @@ Set of helper functions for working with [GraphQL](https://graphql.org/), mostly
 
 
 ## Installation
-Add `[district0x/district-graphql-utils "1.0.2"]` into your project.clj  
+Add `[district0x/district-graphql-utils "1.0.3"]` into your project.clj  
 Include `[district.graphql-utils]` in your CLJS file  
 
 ## API Overview
@@ -46,6 +46,8 @@ Converts [root value](http://graphql.org/graphql-js/graphql/#graphql) data struc
 so it can be passed into a graphql-js library. It also converts field arguments passed to each resolver function into
 clj.
 
+Optionally as a seconds arg you can pass map with `:gql-name->kw` & `:kw->gql-name` for custom name conversion functions.
+
 ```clojure
 (def root-value (graphql-utils/clj->js-root-value {:a (fn [] {:b 1})}))
 (aget ((aget root-value "a")) "b")
@@ -55,7 +57,7 @@ clj.
 #### <a name="js-clj-response">`js->clj-response [res]`
 Converts GraphQL response into clj data structures, since GraphQL returns each object in a tree as an instance of a class. 
 
-Optionally as a seconds arg you can pass `:gql-name->kw-fn` for custom `gql-name->kw` function. 
+Optionally as a seconds arg you can pass map with `:gql-name->kw` for custom name conversion function. 
 ```clojure
 (graphql-utils/js->clj-response (clj->js {"data" {"profilePicture_imageHeight" 100}}))
 ;; => {:data {:profile-picture/image-height 100}}
