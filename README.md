@@ -7,7 +7,7 @@ Set of helper functions for working with [GraphQL](https://graphql.org/), mostly
 
 
 ## Installation
-Add `[district0x/district-graphql-utils "1.0.3"]` into your project.clj  
+Add `[district0x/district-graphql-utils "1.0.4"]` into your project.clj  
 Include `[district.graphql-utils]` in your CLJS file  
 
 ## API Overview
@@ -29,6 +29,9 @@ Note, this is opinionated way how to convert namespaced keyword into string.
 
 (graphql-utils/kw->gql-name :user.profile-picture/image-height)
 ;; => "user_profilePicture_imageHeight"
+
+(graphql-utils/kw->gql-name :user/active?)
+;; => "user_active_"
 ```
 
 #### <a name="gql-name-kw">`gql-name->kw [gql-name]`
@@ -39,6 +42,9 @@ Converts GraphQL compatible name into keyword.
 
 (graphql-utils/gql-name->kw "user_profilePicture_imageHeight")
 ;; => :user.profile-picture/image-height
+
+(graphql-utils/gql-name->kw "user_active_")
+;; => :user/active?
 ```
 
 #### <a name="clj-js-root-value">`clj->js-root-value [root-value]`
