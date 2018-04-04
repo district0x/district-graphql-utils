@@ -2,6 +2,7 @@
   (:require
     [cljs-time.core :as t]
     [cljs.test :refer [deftest is testing run-tests async use-fixtures]]
+    [cljsjs.graphql]
     [district.graphql-utils :as graphql-utils]))
 
 (deftest tests
