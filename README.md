@@ -7,8 +7,10 @@ Set of helper functions for working with [GraphQL](https://graphql.org/), mostly
 
 
 ## Installation
-Add `[district0x/district-graphql-utils "1.0.4"]` into your project.clj  
+Add `[district0x/district-graphql-utils "1.0.5"]` into your project.clj
+For browser usage also add `[cljsjs/graphql "0.13.1-0"]` (or latest version) into your project.clj
 Include `[district.graphql-utils]` in your CLJS file  
+For browser usage also add `[cljsjs.graphql]` in your CLJS file
 
 ## API Overview
 - [district.graphql-utils](#districtgraphql-utils)
@@ -16,6 +18,7 @@ Include `[district.graphql-utils]` in your CLJS file
   - [gql-name->kw](#gql-name-kw)
   - [clj->js-root-value](#clj-js-root-value)
   - [js->clj-response](#js->clj-response)
+  - [add-fields-to-schema-types](#add-fields-to-schema-types)
   
 
 ## district.graphql-utils
@@ -67,6 +70,18 @@ Optionally as a seconds arg you can pass map with `:gql-name->kw` for custom nam
 ```clojure
 (graphql-utils/js->clj-response (clj->js {"data" {"profilePicture_imageHeight" 100}}))
 ;; => {:data {:profile-picture/image-height 100}}
+```
+
+#### <a name="add-fields-to-schema-types">`add-fields-to-schema-types [schema-ast fields]`
+Will add given fields to user defined types in schema AST. 
+ 
+```clojure
+(let [schema-ast (js/GraphQL.buildSchema "type User {name: String}")]
+  (graphql-utils/add-fields-to-schema-types schema-ast [{:type js/GraphQL.GraphQLID
+                                                         :name "userId"
+                                                         :args []}])
+  (object? (aget (.getFields (aget (.getTypeMap schema-ast) "User")) "userId")))
+;; => true    
 ```
 
 ## Development

@@ -1,5 +1,6 @@
 (ns tests.all
   (:require
+    [cljs-time.core :as t]
     [cljs.test :refer [deftest is testing run-tests async use-fixtures]]
     [district.graphql-utils :as graphql-utils]))
 
@@ -21,6 +22,62 @@
     (is (= 1 (aget ((aget root-value "a")) "b"))))
 
   (let [res (graphql-utils/js->clj-response (clj->js {"data" {"profilePicture_imageHeight" 100}}))]
-    (is (= res {:data {:profile-picture/image-height 100}}))))
+    (is (= res {:data {:profile-picture/image-height 100}})))
+
+  (let [schema-ast (js/GraphQL.buildSchema "type User {name: String}")]
+    (graphql-utils/add-fields-to-schema-types schema-ast [{:type js/GraphQL.GraphQLID
+                                                           :name "userId"
+                                                           :args []}])
+    (is (object? (aget (.getFields (aget (.getTypeMap schema-ast) "User")) "userId"))))
+
+
+  (let [schema-ast (js/GraphQL.buildSchema "scalar Date
+                                            type User {birth: Date}
+                                            type Query {user: User}")
+        root-value (graphql-utils/clj->js-root-value
+                     {:user (constantly
+                              {:birth (t/date-time 2018 05 05)})})
+        query "{user {birth}}"]
+
+    (is (= 1525478400000 (-> schema-ast
+                           graphql-utils/add-date-type
+                           (js/GraphQL.graphqlSync query root-value)
+                           graphql-utils/js->clj-response
+                           :data
+                           :user
+                           :birth)))
+
+    (is (t/equal? (t/date-time 2018 05 05)
+                  (-> schema-ast
+                    (graphql-utils/add-date-type {:disable-serialize? true})
+                    (js/GraphQL.graphqlSync query root-value)
+                    graphql-utils/js->clj-response
+                    :data
+                    :user
+                    :birth))))
+
+  (let [schema-ast (js/GraphQL.buildSchema "scalar Keyword
+                                            type User {status: Keyword}
+                                            type Query {user: User}")
+        root-value (graphql-utils/clj->js-root-value
+                     {:user (constantly
+                              {:status :user.status/active})})
+        query "{user {status}}"]
+
+    (is (= "user.status/active" (-> schema-ast
+                                  graphql-utils/add-keyword-type
+                                  (js/GraphQL.graphqlSync query root-value)
+                                  graphql-utils/js->clj-response
+                                  :data
+                                  :user
+                                  :status)))
+
+    (is (= :user.status/active (-> schema-ast
+                                 (graphql-utils/add-keyword-type {:disable-serialize? true})
+                                 (js/GraphQL.graphqlSync query root-value)
+                                 graphql-utils/js->clj-response
+                                 :data
+                                 :user
+                                 :status)))))
 
 

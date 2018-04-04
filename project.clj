@@ -1,12 +1,14 @@
-(defproject district0x/district-graphql-utils "1.0.4"
+(defproject district0x/district-graphql-utils "1.0.5"
   :description "Set of functions helpful for working with GraphQL"
   :url "https://github.com/district0x/district-graphql-utils"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
 
   :dependencies [[camel-snake-kebab "0.4.0"]
-                 [district0x/district-cljs-utils "1.0.1"]
-                 [org.clojure/clojurescript "1.9.946"]]
+                 [cljsjs/graphql "0.13.1-0"]
+                 [com.andrewmcveigh/cljs-time "0.5.2"]
+                 [district0x/district-cljs-utils "1.0.2"]
+                 [org.clojure/clojurescript "1.10.238"]]
 
   :doo {:paths {:karma "./node_modules/karma/bin/karma"}}
 
