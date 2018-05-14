@@ -1,4 +1,4 @@
-(defproject district0x/district-graphql-utils "1.0.5"
+(defproject district0x/district-graphql-utils "1.0.6"
   :description "Set of functions helpful for working with GraphQL"
   :url "https://github.com/district0x/district-graphql-utils"
   :license {:name "Eclipse Public License"
@@ -15,7 +15,8 @@
   :npm {:devDependencies [[karma "1.7.1"]
                           [karma-chrome-launcher "2.2.0"]
                           [karma-cli "1.0.1"]
-                          [karma-cljs-test "0.1.0"]]}
+                          [karma-cljs-test "0.1.0"]]
+        :dependecies [[graphql-tools "3.0.1"]]}
 
   :profiles {:dev {:dependencies [[com.cemerick/piggieback "0.2.2"]
                                   [day8.re-frame/test "0.1.5"]
