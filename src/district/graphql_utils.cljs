@@ -190,7 +190,7 @@
   resolvers-map: A map like {:Type {:field1 resolver-fn}}.
   kw->gql-name: A fn for serializing keywords to gql names.
   gql-name->kw: A fn for parsing keywords from gql names."
-  [schema-str resolvers-map kw->gql-name gql-name->kw]
+  [schema-str resolvers-map {:keys [kw->gql-name gql-name->kw]}]
   (make-executable-schema (js-obj "typeDefs" schema-str
                                   "resolvers" (build-resolvers resolvers-map
                                                                kw->gql-name

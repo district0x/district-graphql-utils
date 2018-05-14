@@ -19,7 +19,7 @@ For browser usage also add `[cljsjs.graphql]` in your CLJS file
   - [clj->js-root-value](#clj-js-root-value)
   - [js->clj-response](#js->clj-response)
   - [add-fields-to-schema-types](#add-fields-to-schema-types)
-  
+  - [build-schema](#build-schema)
 
 ## district.graphql-utils
 
@@ -84,7 +84,7 @@ Will add given fields to user defined types in schema AST.
 ;; => true    
 ```
 
-#### <a name="build-schema">`build-schema [schema-str resolvers-map kw->gql-name gql-name->kw]`
+#### <a name="build-schema">`build-schema [schema-str resolvers-map {:keys [kw->gql-name gql-name->kw]}]`
 Builds a GraphQLSchema from a schema string and a resolvers map.
 - schema-str: A string containig a graphql schema definition.
 - resolvers-map: A map like {:Type {:field1 resolver-fn}}.
@@ -123,7 +123,8 @@ Builds a GraphQLSchema from a schema string and a resolvers map.
                  :Author {:posts (fn [{:keys [posts] :as author}])}
                  :Post {:author (fn [{:keys [author] :as post}])}}]
   
-  (build-schema schema resolvers kw->gql-name gql-name->kw))
+  (build-schema schema resolvers {:kw->gql-name kw->gql-name
+                                  :gql-name->kw gql-name->kw}))
 ```
 
 ## Development
