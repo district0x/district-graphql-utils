@@ -19,7 +19,7 @@ For browser usage also add `[cljsjs.graphql]` in your CLJS file
   - [clj->js-root-value](#clj-js-root-value)
   - [js->clj-response](#js->clj-response)
   - [add-fields-to-schema-types](#add-fields-to-schema-types)
-  
+  - [build-schema](#build-schema)
 
 ## district.graphql-utils
 
@@ -82,6 +82,49 @@ Will add given fields to user defined types in schema AST.
                                                          :args []}])
   (object? (aget (.getFields (aget (.getTypeMap schema-ast) "User")) "userId")))
 ;; => true    
+```
+
+#### <a name="build-schema">`build-schema [schema-str resolvers-map {:keys [kw->gql-name gql-name->kw]}]`
+Builds a GraphQLSchema from a schema string and a resolvers map.
+- schema-str: A string containig a graphql schema definition.
+- resolvers-map: A map like {:Type {:field1 resolver-fn}}.
+- kw->gql-name: A fn for serializing keywords to gql names.
+- gql-name->kw: A fn for parsing keywords from gql names.
+
+```clojure
+(let [schema "type Author {
+                         id: ID! 
+                         firstName: String
+                         lastName: String
+                         posts: [Post]
+                       }
+                     
+                       type Post {
+                         id: ID!
+                         title: String
+                         author: Author
+                         votes: Int
+                       }
+                     
+                       type Query {
+                         posts(minVotes: Int): [Post]
+                       }
+                     
+                       type Mutation {
+                         upvotePost (postId: ID!): Post
+                       }
+                     
+                       schema {
+                         query: Query
+                         mutation: Mutation
+                       }"
+      resolvers {:Query {:posts (fn [obj {:keys [min-votes] :as args}])}
+                 :Mutation {:upvote-post (fn [obj {:keys [post-id] :as args}])}
+                 :Author {:posts (fn [{:keys [posts] :as author}])}
+                 :Post {:author (fn [{:keys [author] :as post}])}}]
+  
+  (build-schema schema resolvers {:kw->gql-name kw->gql-name
+                                  :gql-name->kw gql-name->kw}))
 ```
 
 ## Development
