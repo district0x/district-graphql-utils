@@ -1,12 +1,13 @@
 (ns district.graphql-utils
   (:require
-    [camel-snake-kebab.core :as cs :include-macros true]
-    [camel-snake-kebab.extras :refer [transform-keys]]
-    [cljs-time.coerce :as tc]
-    [cljs-time.core :as t]
-    [clojure.string :as string]
-    [clojure.walk :as walk]
-    [district.cljs-utils :refer [js-obj->clj kw->str]]))
+   [bignumber.core :as bn]
+   [camel-snake-kebab.core :as cs :include-macros true]
+   [camel-snake-kebab.extras :refer [transform-keys]]
+   [cljs-time.coerce :as tc]
+   [cljs-time.core :as t]
+   [clojure.string :as string]
+   [clojure.walk :as walk]
+   [district.cljs-utils :refer [js-obj->clj kw->str]]))
 
 (def GraphQL (if (exists? js/GraphQL)
                js/GraphQL
@@ -96,9 +97,9 @@
     (doseq [type-key (js-keys type-map)]
       (let [gql-type (aget type-map type-key)]
         (when (and (instance? (aget GraphQL "GraphQLObjectType") gql-type)
-                   (not= query-type gql-type)
-                   (nil? (aget gql-type "_typeConfig" "isIntrospection"))
-                   (nil? (aget gql-type "_fields" "id")))
+                (not= query-type gql-type)
+                (nil? (aget gql-type "_typeConfig" "isIntrospection"))
+                (nil? (aget gql-type "_fields" "id")))
           (doseq [field fields]
             (aset gql-type "_fields" (:name field) (clj->js field)))))))
   schema-ast)
@@ -129,6 +130,18 @@
    :parseLiteral (fn [ast]
                    (tc/from-long (aget ast "value")))})
 
+(def bignumber-scalar-type-config
+  {:name "BigNumber"
+   :description "bignumber.js"
+   :serialize (fn [value]
+                (if (bn/bignumber? value)
+                  (.toString value)
+                  value))
+   :parseValue (fn [value]
+                 (bn/number value))
+   :parseLiteral (fn [ast]
+                   (bn/number (aget ast "value")))})
+
 
 (defn add-scalar-type [schema-ast {:keys [:name :description :serialize :parseValue :parseLiteral]
                                    :or {serialize identity
@@ -137,7 +150,7 @@
                                    :as scalar-type-config}]
   (if (nil? (aget schema-ast "_typeMap" name))
     (aset schema-ast "_typeMap" name (new (aget GraphQL "GraphQLScalarType")
-                                          (clj->js scalar-type-config)))
+                                       (clj->js scalar-type-config)))
     (let [keyword-type (aget schema-ast "_typeMap" name "_scalarConfig")]
       (aset keyword-type "parseValue" parseValue)
       (aset keyword-type "parseLiteral" parseLiteral)
@@ -152,4 +165,9 @@
 
 (defn add-date-type [schema-ast & [{:keys [:disable-serialize?]}]]
   (add-scalar-type schema-ast (cond-> date-scalar-type-config
+                                disable-serialize? (dissoc :serialize))))
+
+
+(defn add-bignumber-type [schema-ast & [{:keys [:disable-serialize?]}]]
+  (add-scalar-type schema-ast (cond-> bignumber-scalar-type-config
                                 disable-serialize? (dissoc :serialize))))

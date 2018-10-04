@@ -8,7 +8,8 @@
                  [cljsjs/graphql "0.13.1-0"]
                  [com.andrewmcveigh/cljs-time "0.5.2"]
                  [district0x/district-cljs-utils "1.0.2"]
-                 [org.clojure/clojurescript "1.10.238"]]
+                 [org.clojure/clojurescript "1.10.238"]
+                 [district0x/bignumber "1.0.3"]]
 
   :doo {:paths {:karma "./node_modules/karma/bin/karma"}}
 
