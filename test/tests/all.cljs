@@ -1,9 +1,10 @@
 (ns tests.all
   (:require
-    [cljs-time.core :as t]
-    [cljs.test :refer [deftest is testing run-tests async use-fixtures]]
-    [cljsjs.graphql]
-    [district.graphql-utils :as graphql-utils]))
+   [bignumber.core :as bn]
+   [cljs-time.core :as t]
+   [cljs.test :refer [deftest is testing run-tests async use-fixtures]]
+   [cljsjs.graphql]
+   [district.graphql-utils :as graphql-utils]))
 
 (deftest tests
   (is (= "abc" (graphql-utils/kw->gql-name :abc)))
@@ -31,6 +32,30 @@
                                                            :args []}])
     (is (object? (aget (.getFields (aget (.getTypeMap schema-ast) "User")) "userId"))))
 
+  (let [schema-ast (js/GraphQL.buildSchema "scalar BigNumber
+                                            type User {age: BigNumber}
+                                            type Query {user: User}")
+        root-value (graphql-utils/clj->js-root-value
+                     {:user (constantly
+                              {:age (bn/number "10e10")})})
+        query "{user {age}}"]
+
+    (is (bn/= (bn/number "10e10") (-> schema-ast
+                                    graphql-utils/add-bignumber-type
+                                    (js/GraphQL.graphqlSync query root-value)
+                                    graphql-utils/js->clj-response
+                                    :data
+                                    :user
+                                    :age)))
+
+    (is (bn/= (bn/number "10e10")
+          (-> schema-ast
+            (graphql-utils/add-bignumber-type {:disable-serialize? true})
+            (js/GraphQL.graphqlSync query root-value)
+            graphql-utils/js->clj-response
+            :data
+            :user
+            :age))))
 
   (let [schema-ast (js/GraphQL.buildSchema "scalar Date
                                             type User {birth: Date}
@@ -49,13 +74,13 @@
                            :birth)))
 
     (is (t/equal? (t/date-time 2018 05 05)
-                  (-> schema-ast
-                    (graphql-utils/add-date-type {:disable-serialize? true})
-                    (js/GraphQL.graphqlSync query root-value)
-                    graphql-utils/js->clj-response
-                    :data
-                    :user
-                    :birth))))
+          (-> schema-ast
+            (graphql-utils/add-date-type {:disable-serialize? true})
+            (js/GraphQL.graphqlSync query root-value)
+            graphql-utils/js->clj-response
+            :data
+            :user
+            :birth))))
 
   (let [schema-ast (js/GraphQL.buildSchema "scalar Keyword
                                             type User {status: Keyword}
