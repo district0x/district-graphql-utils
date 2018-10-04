@@ -1,4 +1,4 @@
-(defproject district0x/district-graphql-utils "1.0.5"
+(defproject district0x/district-graphql-utils "1.0.6"
   :description "Set of functions helpful for working with GraphQL"
   :url "https://github.com/district0x/district-graphql-utils"
   :license {:name "Eclipse Public License"
