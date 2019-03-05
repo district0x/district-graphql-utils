@@ -26,6 +26,6 @@ env:
 deploy:
   - provider: script
     skip_cleanup: true
-    script: git status && lein release :patch
+    script: lein release :patch
     on:
       branch: master
