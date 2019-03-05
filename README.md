@@ -2,12 +2,13 @@
 
 [![Build Status](https://travis-ci.org/district0x/district-graphql-utils.svg?branch=master)](https://travis-ci.org/district0x/district-graphql-utils)
 
-
 Set of helper functions for working with [GraphQL](https://graphql.org/), mostly related to clj->js and js->clj transformations.
 
-
 ## Installation
-Add `[district0x/district-graphql-utils "1.0.5"]` into your project.clj
+Add <br>
+[![Clojars Project](https://img.shields.io/clojars/v/district0x/district-graphql-utils.svg)](https://clojars.org/district0x/district-graphql-utils) <br>
+into your project.clj <br>
+
 For browser usage also add `[cljsjs/graphql "0.13.1-0"]` (or latest version) into your project.clj
 Include `[district.graphql-utils]` in your CLJS file  
 For browser usage also add `[cljsjs.graphql]` in your CLJS file
