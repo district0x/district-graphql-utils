@@ -2,8 +2,30 @@ sudo: required
 dist: trusty
 language: clojure
 script: lein doo chrome "tests" once
+notifications:
+  email:
+    recipients:
+    - juan@district0x.io
+    - daniel@district0x.io
+    on_success: never
+    on_failure: always
+  slack:
+    on_success: always
+    on_failure: always
+    rooms:
+    - district0x:53vhalUfg0MitsQwzjP5PWdd#travis-ci
 addons:
   chrome: stable
 before_script:
-  - export DISPLAY=:99.0
-  - sh -e /etc/init.d/xvfb start
+- export DISPLAY=:99.0
+- sh -e /etc/init.d/xvfb start
+env:
+  global:
+  - secure: QEypfh1xCHfNRqmBaRkZ9d5a3UesJr3LWmNNf9/ipz0UBPYm3H1lsuFhNmMz9Vg8GdHWCNYs5/a61gLDvebXrAHCZrnMgFq7qPxjXoqLh0JHzKV0VV3vaENsb9rjhIrtOPhoNdAY1oP07rQGgcIIJ1XUnZc7peG9B8uzh0SMeMRS18AeG2jmI44f1gbIcDOsYZAgTw85pe0XFcn4+fplPmnmNpCtUBSyPZao8tpW6Sbn+LqX6GST2BK8hedCai/w13zLcHZYOCSFed0WDHM/mrJyInrDH6EtpXkTccKlUhZCsrgTDU/keHHKsbJVkENb/9o3OGGbK49aK4ss1nZYmlAK/nZ2fOVHS/QaeGnGP0IpJK8i0sREbJpCbDGiBQFVnLv9qnSNcqt2zL2ijjBpqELN1TI1iaBgdOgrRbBGANxsjQsDRRZCQCW7vsmzjOfiTZ+1jkRuw5xrcd1GMzKTGQTRli5YUVbnHaPj1HHT7eJUzkt3ESsmqwbNt2lrjYJQqD3PZCq/9lEdJsVkngY25VUeSoGAwJydW0r0QbSPclr6nweDpDHgDKfaJuCwXqAcXMua4Ot7w1W96FY15nNNn0+AKgegoCaTrKFq9tVwlnUXlArZ5zdt0foxdEebTT0TgIRQZXMjA9Z6rTZwgMERHBijmrTw9WscziR27g7ZC9Y=
+  - secure: WrdtG2E10ffjRwHvor1sUUOe8OXykab09w/CSh6qTtyuIvqnPuVTlBgY01RD5uKdKdyG+J+sHOCZaN7AP0BhxYZgwPZK1QMu4jnQ6IHkQt/flI+7o34tc2gg8u8UgcruRA2OcdpFguvamG1eV972jqWi/LxuKdaaeqzrTIWZV35OjkviVARKWnk8Dzu5UFq8pLODj+/BthvYWAAwFp32EyPFe6K0fD+mNDotnT+6duiigcqGgEjjol4AqkXjww5lF8H9Pui/bzLEAZuacNH9XlYaZp6u34jP4CQ4y2Pzx8GG0VQOCAvE19112SPjN9RVbdjSZCyKtiNHJXsAF5CEVORJMLm2zUCUHQPoiFtISMCv8Eu+ceFnuyRjCDrP6fibmZSbnyPN/TYpz9jY/lRvbh8Pph/zTS/POalptM6hEqrT0glty7JbhY60lB7/OM3WLjwxxu2hRQUxmU1c+7UjnZdQnOgY7C9VV2fO+zhzexMjxmO5PcUHlCA9/4uV4mLFQcoKAsisgC1uixvRaDsncF63B9o1mEE0jTmPia09n3tmHTx8Oaa4CMaKgSC8urHxZczMi9xq+mk3AU8eZ7rzpevwdCbcNnmAcL3zhhq8bQ4Okiv661rAORqZ3KrvgenLBcjrGke4LEkYdMPJ6kPb7ERepKuXFX01ra0QTI9Xgsc=
+deploy:
+  - provider: script
+    skip_cleanup: true
+    script: lein release :patch
+    on:
+      branch: master
