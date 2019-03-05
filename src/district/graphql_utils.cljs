@@ -35,18 +35,17 @@
 
 
 (defn gql-name->kw [gql-name]
-  (when gql-name
-    (let [k (name gql-name)]
-      (if (string/starts-with? k "__")
-        (keyword k)
-        (let [k (if (string/ends-with? k "_")
-                  (str (.slice k 0 -1) "?")
-                  k)
-              parts (string/split k "_")
-              parts (if (< 2 (count parts))
-                      [(string/join "." (butlast parts)) (last parts)]
-                      parts)]
-          (apply keyword (map cs/->kebab-case parts)))))))
+  (let [k (name gql-name)]
+    (if (string/starts-with? k "__")
+      (keyword k)
+      (let [k (if (string/ends-with? k "_")
+                (str (.slice k 0 -1) "?")
+                k)
+            parts (string/split k "_")
+            parts (if (< 2 (count parts))
+                    [(string/join "." (butlast parts)) (last parts)]
+                    parts)]
+        (apply keyword (map cs/->kebab-case parts))))))
 
 
 (defn clj->js-root-value [root-value & [opts]]
