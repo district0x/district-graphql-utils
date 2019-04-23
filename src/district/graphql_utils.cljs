@@ -171,3 +171,9 @@
 (defn add-bignumber-type [schema-ast & [{:keys [:disable-serialize?]}]]
   (add-scalar-type schema-ast (cond-> bignumber-scalar-type-config
                                 disable-serialize? (dissoc :serialize))))
+
+
+(defn gql-date->date
+  "parse GraphQL Date type as JS Date object ready to be formatted"
+  [gql-date]
+  (tc/from-long (* 1000 gql-date)))

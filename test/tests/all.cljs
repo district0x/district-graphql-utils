@@ -104,6 +104,8 @@
                                  graphql-utils/js->clj-response
                                  :data
                                  :user
-                                 :status)))))
+                                 :status)))
+
+    (is (t/equal? (t/date-time 2018 05 05) (graphql-utils/gql-date->date 1525478400)))))
 
 

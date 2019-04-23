@@ -20,6 +20,7 @@ For browser usage also add `[cljsjs.graphql]` in your CLJS file
   - [clj->js-root-value](#clj-js-root-value)
   - [js->clj-response](#js->clj-response)
   - [add-fields-to-schema-types](#add-fields-to-schema-types)
+  - [gql-date->date](#gql-date->date)
   
 
 ## district.graphql-utils
@@ -82,6 +83,15 @@ Will add given fields to user defined types in schema AST.
                                                          :name "userId"
                                                          :args []}])
   (object? (aget (.getFields (aget (.getTypeMap schema-ast) "User")) "userId")))
+;; => true    
+```
+
+
+#### <a name="gql-date->date">`gql-date->date [gql-date]`
+Parse GraphQL Date type as CLJS DateTime object ready to be formatted 
+ 
+```clojure
+(cljs-time.core/equal? (cljs-time.core/date-time 2018 05 05) (graphql-utils/gql-date->date 1525478400))
 ;; => true    
 ```
 
