@@ -14,38 +14,40 @@
                (js/require "graphql")))
 
 (defn kw->gql-name [kw]
-  (let [nm (name kw)]
-    (str
-      (when (string/starts-with? nm "__")
-        "__")
-      (when (and (keyword? kw)
-                 (namespace kw))
-        (str (string/replace (cs/->camelCase (namespace kw)) "." "_") "_"))
-      (let [first-letter (first nm)
-            last-letter (last nm)
-            s (if (and (not= first-letter "_")
-                       (= first-letter (string/upper-case first-letter)))
-                (cs/->PascalCase nm)
-                (cs/->camelCase nm))]
-        (if (= last-letter "?")
-          (.slice s 0 -1)
-          s))
-      (when (string/ends-with? nm "?")
-        "_"))))
+  (when kw
+   (let [nm (name kw)]
+     (str
+       (when (string/starts-with? nm "__")
+         "__")
+       (when (and (keyword? kw)
+                  (namespace kw))
+         (str (string/replace (cs/->camelCase (namespace kw)) "." "_") "_"))
+       (let [first-letter (first nm)
+             last-letter (last nm)
+             s (if (and (not= first-letter "_")
+                        (= first-letter (string/upper-case first-letter)))
+                 (cs/->PascalCase nm)
+                 (cs/->camelCase nm))]
+         (if (= last-letter "?")
+           (.slice s 0 -1)
+           s))
+       (when (string/ends-with? nm "?")
+         "_")))))
 
 
 (defn gql-name->kw [gql-name]
-  (let [k (name gql-name)]
-    (if (string/starts-with? k "__")
-      (keyword k)
-      (let [k (if (string/ends-with? k "_")
-                (str (.slice k 0 -1) "?")
-                k)
-            parts (string/split k "_")
-            parts (if (< 2 (count parts))
-                    [(string/join "." (butlast parts)) (last parts)]
-                    parts)]
-        (apply keyword (map cs/->kebab-case parts))))))
+  (when gql-name
+   (let [k (name gql-name)]
+     (if (string/starts-with? k "__")
+       (keyword k)
+       (let [k (if (string/ends-with? k "_")
+                 (str (.slice k 0 -1) "?")
+                 k)
+             parts (string/split k "_")
+             parts (if (< 2 (count parts))
+                     [(string/join "." (butlast parts)) (last parts)]
+                     parts)]
+         (apply keyword (map cs/->kebab-case parts)))))))
 
 
 (defn clj->js-root-value [root-value & [opts]]
