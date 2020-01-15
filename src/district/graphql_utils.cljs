@@ -1,8 +1,8 @@
 (ns district.graphql-utils
   (:require
    [bignumber.core :as bn]
-   [camel-snake-kebab.core :as cs :include-macros true]
-   [camel-snake-kebab.extras :refer [transform-keys]]
+   [camel-snake-kebab.core :as camel-snake]
+   [camel-snake-kebab.extras :as camel-snake-extras]
    [cljs-time.coerce :as tc]
    [cljs-time.core :as t]
    [clojure.string :as string]
@@ -13,21 +13,26 @@
                js/GraphQL
                (js/require "graphql")))
 
-(defn kw->gql-name [kw]
-  (when kw
-   (let [nm (name kw)]
-     (str
+
+(defn kw->gql-name
+  "From namespaced keyword to GQL name:
+  :videos.order-by/created-on -> videos_orderBy_createdOn"
+  [kw]
+  (let [nm (name kw)]
+    (if (#{"ID" "ID!"} nm)
+      nm
+      (str
        (when (string/starts-with? nm "__")
          "__")
        (when (and (keyword? kw)
                   (namespace kw))
-         (str (string/replace (cs/->camelCase (namespace kw)) "." "_") "_"))
+         (str (string/replace (camel-snake/->camelCase (namespace kw)) "." "_") "_"))
        (let [first-letter (first nm)
              last-letter (last nm)
              s (if (and (not= first-letter "_")
                         (= first-letter (string/upper-case first-letter)))
-                 (cs/->PascalCase nm)
-                 (cs/->camelCase nm))]
+                 (camel-snake/->PascalCase nm)
+                 (camel-snake/->camelCase nm))]
          (if (= last-letter "?")
            (.slice s 0 -1)
            s))
@@ -37,18 +42,37 @@
 
 (defn gql-name->kw [gql-name]
   (when gql-name
-   (let [k (name gql-name)]
-     (if (string/starts-with? k "__")
-       (keyword k)
-       (let [k (if (string/ends-with? k "_")
-                 (str (.slice k 0 -1) "?")
-                 k)
-             parts (string/split k "_")
-             parts (if (< 2 (count parts))
-                     [(string/join "." (butlast parts)) (last parts)]
-                     parts)]
-         (apply keyword (map cs/->kebab-case parts)))))))
+    (let [k (name gql-name)]
+      (if (string/starts-with? k "__")
+        (keyword k)
+        (let [k (if (string/ends-with? k "_")
+                  (str (.slice k 0 -1) "?")
+                  k)
+              parts (string/split k "_")
+              parts (if (< 2 (count parts))
+                      [(string/join "." (butlast parts)) (last parts)]
+                      parts)]
+          (apply keyword (map camel-snake/->kebab-case parts)))))))
 
+
+(defn clj->gql
+  [m]
+  (->> m
+       (camel-snake-extras/transform-keys kw->gql-name)
+       (clj->js)))
+
+
+(defn gql->clj [m]
+  (->> m
+       (js->clj)
+       (camel-snake-extras/transform-keys gql-name->kw )))
+
+
+(defn gql-input->clj [input]
+  (reduce (fn [result field]
+            (assoc result (gql-name->kw field) (aget input field)))
+          {}
+          (js-keys input)))
 
 (defn clj->js-root-value [root-value & [opts]]
   (let [gql-name->kw (or (:gql-name->kw opts) gql-name->kw)
@@ -61,7 +85,7 @@
                                 (cond
                                   (fn? v)
                                   (fn [params context schema]
-                                    (let [parsed-params (transform-keys gql-name->kw (js->clj params))
+                                    (let [parsed-params (camel-snake-extras/transform-keys gql-name->kw (js->clj params))
                                           result (clj->js-root-value (v parsed-params context schema))]
                                       result))
 
@@ -90,7 +114,7 @@
 (defn js->clj-response [res & [opts]]
   (let [gql-name->kw (or (:gql-name->kw opts) gql-name->kw)
         resp (js->clj-result-objects res)]
-    (update resp :data #(transform-keys gql-name->kw %))))
+    (update resp :data #(camel-snake-extras/transform-keys gql-name->kw %))))
 
 
 (defn add-fields-to-schema-types [schema-ast fields]
@@ -99,9 +123,9 @@
     (doseq [type-key (js-keys type-map)]
       (let [gql-type (aget type-map type-key)]
         (when (and (instance? (aget GraphQL "GraphQLObjectType") gql-type)
-                (not= query-type gql-type)
-                (nil? (aget gql-type "_typeConfig" "isIntrospection"))
-                (nil? (aget gql-type "_fields" "id")))
+                   (not= query-type gql-type)
+                   (nil? (aget gql-type "_typeConfig" "isIntrospection"))
+                   (nil? (aget gql-type "_fields" "id")))
           (doseq [field fields]
             (aset gql-type "_fields" (:name field) (clj->js field)))))))
   schema-ast)
@@ -152,7 +176,7 @@
                                    :as scalar-type-config}]
   (if (nil? (aget schema-ast "_typeMap" name))
     (aset schema-ast "_typeMap" name (new (aget GraphQL "GraphQLScalarType")
-                                       (clj->js scalar-type-config)))
+                                          (clj->js scalar-type-config)))
     (let [keyword-type (aget schema-ast "_typeMap" name "_scalarConfig")]
       (aset keyword-type "parseValue" parseValue)
       (aset keyword-type "parseLiteral" parseLiteral)
