@@ -177,7 +177,7 @@
   (if (nil? (aget schema-ast "_typeMap" name))
     (aset schema-ast "_typeMap" name (new (aget GraphQL "GraphQLScalarType")
                                           (clj->js scalar-type-config)))
-    (let [keyword-type (aget schema-ast "_typeMap" name "_scalarConfig")]
+    (let [keyword-type (aget schema-ast "_typeMap" name)]
       (aset keyword-type "parseValue" parseValue)
       (aset keyword-type "parseLiteral" parseLiteral)
       (aset keyword-type "serialize" serialize)))

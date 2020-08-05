@@ -1,11 +1,11 @@
-(defproject district0x/district-graphql-utils "1.0.10-SNAPSHOT"
+(defproject district0x/district-graphql-utils "1.0.11-SNAPSHOT"
   :description "Set of functions helpful for working with GraphQL"
   :url "https://github.com/district0x/district-graphql-utils"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
 
   :dependencies [[camel-snake-kebab "0.4.0"]
-                 [cljsjs/graphql "0.13.1-0"]
+                 [cljsjs/graphql "15.3.0-0"]
                  [com.andrewmcveigh/cljs-time "0.5.2"]
                  [district0x/district-cljs-utils "1.0.2"]
                  [org.clojure/clojurescript "1.10.238"]
