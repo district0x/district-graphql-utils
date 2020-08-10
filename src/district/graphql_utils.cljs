@@ -76,30 +76,32 @@
 
 (defn clj->js-root-value [root-value & [opts]]
   (let [gql-name->kw (or (:gql-name->kw opts) gql-name->kw)
-        kw->gql-name (or (:kw->gql-name opts) kw->gql-name)]
+        kw->gql-name (or (:kw->gql-name opts) kw->gql-name)
+        r (cond
+            (map? root-value)
+            (clj->js (into {} (map (fn [[k v]]
+                                     [(kw->gql-name k)
+                                      (cond
+                                        (fn? v)
+                                        (fn [params context schema]
+                                          (let [parsed-params (camel-snake-extras/transform-keys gql-name->kw (js->clj params))
+                                                result (clj->js-root-value (v parsed-params context schema))]
+                                            result))
 
-    (cond
-      (map? root-value)
-      (clj->js (into {} (map (fn [[k v]]
-                               [(kw->gql-name k)
-                                (cond
-                                  (fn? v)
-                                  (fn [params context schema]
-                                    (let [parsed-params (camel-snake-extras/transform-keys gql-name->kw (js->clj params))
-                                          result (clj->js-root-value (v parsed-params context schema))]
-                                      result))
+                                        :else v)])
+                                   root-value))
+                     :keyword-fn identity)
 
-                                  :else v)])
-                             root-value))
-               :keyword-fn identity)
+            (sequential? root-value)
+            (clj->js (map clj->js-root-value root-value) :keyword-fn identity)
 
-      (sequential? root-value)
-      (clj->js (map clj->js-root-value root-value) :keyword-fn identity)
+            (instance? js/Promise root-value)
+            (.then root-value clj->js-root-value)
 
-      (instance? js/Promise root-value)
-      (.then root-value clj->js-root-value)
+            :else root-value)]
+    r
 
-      :else root-value)))
+    ))
 
 
 (defn- js->clj-result-objects [res]
@@ -135,12 +137,18 @@
   {:name "Keyword"
    :description "Clojure Keyword"
    :serialize (fn [value]
+                (println "Maybe serializing keyword " value)
                 (if (keyword? value)
-                  (kw->str value)
+
+                  (do
+                    (println "Serializing keyword" value)
+                    (kw->str value))
                   value))
    :parseValue (fn [value]
+                 (println "!!!!!!!!! Parsing value " value "into " (keyword value))
                  (keyword value))
    :parseLiteral (fn [ast]
+                   (println "!!!!!!!!! Parsing literal " ast "->" (aget ast "value") "into " (keyword (aget ast "value")))
                    (keyword (aget ast "value")))})
 
 
@@ -148,12 +156,18 @@
   {:name "Date"
    :description "goog.closure Date"
    :serialize (fn [value]
+                (println "Maybe serializing date" value)
                 (if (t/date? value)
-                  (tc/to-long value)
+                  (do
+                    (println "Serializing DATE" value "to" (tc/to-long value))
+                    (tc/to-long value)
+                    )
                   value))
    :parseValue (fn [value]
+                 (println "date parse value")
                  (tc/from-long value))
    :parseLiteral (fn [ast]
+                   (println "date parse litteral---------------------" ast)
                    (tc/from-long (aget ast "value")))})
 
 (def bignumber-scalar-type-config
@@ -178,9 +192,15 @@
     (aset schema-ast "_typeMap" name (new (aget GraphQL "GraphQLScalarType")
                                           (clj->js scalar-type-config)))
     (let [keyword-type (aget schema-ast "_typeMap" name)]
+      (js/console.log "*************** NAME" name)
+      (js/console.log "*************** 1" (aget schema-ast "_typeMap"))
+      (js/console.log "*************** 2" (aget schema-ast "_typeMap" name))
+      (js/console.log "******KWT" keyword-type)
+      (js/console.log "****** Added parseLiteral " parseLiteral)
       (aset keyword-type "parseValue" parseValue)
       (aset keyword-type "parseLiteral" parseLiteral)
       (aset keyword-type "serialize" serialize)))
+  (js/console.log "********FINAL" schema-ast)
   schema-ast)
 
 
