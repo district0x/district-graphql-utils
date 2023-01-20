@@ -18,6 +18,7 @@ For browser usage also add `[cljsjs.graphql]` in your CLJS file
   - [kw->gql-name](#kw-gql-name)
   - [gql-name->kw](#gql-name-kw)
   - [clj->js-root-value](#clj-js-root-value)
+  - [js->clj-objects](#js->clj-objects)
   - [js->clj-response](#js->clj-response)
   - [add-fields-to-schema-types](#add-fields-to-schema-types)
   - [gql-date->date](#gql-date->date)
@@ -63,6 +64,13 @@ Optionally as a seconds arg you can pass map with `:gql-name->kw` & `:kw->gql-na
 (def root-value (graphql-utils/clj->js-root-value {:a (fn [] {:b 1})}))
 (aget ((aget root-value "a")) "b")
 ;; => 1
+```
+
+#### <a name="js-clj-objects">`js->clj-objects [res]`
+Converts GraphQL request or response object into clj data structures, without keyword naming conversion.
+```clojure
+(graphql-utils/js->clj-objects (clj->js {"data" {"profilePicture_imageHeight" 100}}))
+;; => {:data {:profilePicture_imageHeight 100}}
 ```
 
 #### <a name="js-clj-response">`js->clj-response [res]`

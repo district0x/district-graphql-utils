@@ -23,6 +23,9 @@
     (is (object? root-value))
     (is (= 1 (aget ((aget root-value "a")) "b"))))
 
+  (let [res (graphql-utils/js->clj-objects (clj->js {"data" {"profilePicture_imageHeight" 100}}))]
+    (is (= res {:data {:profilePicture_imageHeight 100}})))
+
   (let [res (graphql-utils/js->clj-response (clj->js {"data" {"profilePicture_imageHeight" 100}}))]
     (is (= res {:data {:profile-picture/image-height 100}})))
 

@@ -102,7 +102,7 @@
       :else root-value)))
 
 
-(defn- js->clj-result-objects [res]
+(defn js->clj-objects [res]
   (walk/prewalk (fn [x]
                   (if (and (nil? (type x))
                            (seq (js-keys x)))
@@ -113,7 +113,7 @@
 
 (defn js->clj-response [res & [opts]]
   (let [gql-name->kw (or (:gql-name->kw opts) gql-name->kw)
-        resp (js->clj-result-objects res)]
+        resp (js->clj-objects res)]
     (update resp :data #(camel-snake-extras/transform-keys gql-name->kw %))))
 
 
@@ -177,7 +177,7 @@
   (if (nil? (aget schema-ast "_typeMap" name))
     (aset schema-ast "_typeMap" name (new (aget GraphQL "GraphQLScalarType")
                                           (clj->js scalar-type-config)))
-    (let [keyword-type (aget schema-ast "_typeMap" name "_scalarConfig")]
+    (let [keyword-type (or (aget schema-ast "_typeMap" name "_scalarConfig") (aget schema-ast "_typeMap" name))]
       (aset keyword-type "parseValue" parseValue)
       (aset keyword-type "parseLiteral" parseLiteral)
       (aset keyword-type "serialize" serialize)))
