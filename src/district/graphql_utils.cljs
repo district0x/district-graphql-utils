@@ -19,7 +19,7 @@
   :videos.order-by/created-on -> videos_orderBy_createdOn"
   [kw]
   (let [nm (name kw)]
-    (if (#{"ID" "ID!"} nm)
+    (if (#{"ID" "ID!" "[ID]" "[ID!]" "[ID]!" "[ID!]!"} nm)
       nm
       (str
        (when (string/starts-with? nm "__")
